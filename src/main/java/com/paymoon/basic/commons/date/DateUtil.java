@@ -632,6 +632,33 @@ public class DateUtil {
 	public static String getTime(Date date) {
 		return DateToString(date, DateStyle.HH_MM_SS);
 	}
+	/**
+	 * 获取日期的时间。默认YYYY_MM_DD_HH_MM_SS格式。失败返回null。
+	 * @param date 日期字符串
+	 * @return 时间
+	 */
+	public static String getDateTime(String date) {
+		return StringToString(date, DateStyle.YYYY_MM_DD_HH_MM_SS);
+	}
+	
+	/**
+	 * 获取日期的时间。默认YYYY_MM_DD_HH_MM_SS格式。失败返回null。
+	 * @param date 日期
+	 * @return 时间
+	 */
+	public static String getDateTime(Date date) {
+		return DateToString(date, DateStyle.YYYY_MM_DD_HH_MM_SS);
+	}
+	
+	/**
+	 * 获取当前日期的时间。默认YYYY_MM_DD_HH_MM_SS格式。失败返回null。
+	 * @param date 日期
+	 * @return 时间
+	 */
+	public static String getDateTimeNow() {
+		Date date = new Date();
+		return DateToString(date, DateStyle.YYYY_MM_DD_HH_MM_SS);
+	}
 
 	/**
 	 * 获取日期的星期。失败返回null。
