@@ -15,18 +15,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.ReflectionUtil;
+
+import redis.clients.jedis.Jedis;
 
 public class MyProp {
 	public static final String CONF = "/conf/";
 	public static final String BIN = "/bin/";
 	public static final String DATA = "/data/";
 	public static final String LIB = "/lib/";
+	public static String userDir = "GLOBAL_127.0.0.1_";
 	private static Map propsCache = new HashMap();
 
-	private static String[] fileArray = { "version.properties", "db.properties", "runtime.properties",
-			"sysconf.properties", "common.properties" };
+	private static String[] fileArray = { "version.properties",
+			"db.properties", "runtime.properties", "sysconf.properties",
+			"common.properties" };
+	static {
+		userDir = System.getProperty("user.dir");
+		userDir += "_";
+		userDir += GetLocalIp.getLocalHostIP();
+		userDir += "_";
+
+	}
 
 	public static String getDir() {
 		String bindir = System.getProperty("user.dir");
@@ -38,7 +50,8 @@ public class MyProp {
 		return bindir;
 	}
 
-	public static void write(String filename, String key, String value) throws IOException {
+	public static void write(String filename, String key, String value)
+			throws IOException {
 		boolean exsitKey = false;
 
 		List<String> t = readFileByLines(filename);
@@ -57,7 +70,8 @@ public class MyProp {
 		appendContent(filename, sb.toString());
 	}
 
-	private static void appendContent(String fileName, String content) throws IOException {
+	private static void appendContent(String fileName, String content)
+			throws IOException {
 		FileWriter writer = new FileWriter(fileName, false);
 		writer.write(content);
 		writer.close();
@@ -91,14 +105,19 @@ public class MyProp {
 		return strs;
 	}
 
-	private static String getProperty(String resourceName, String key, String defaultValue, Locale locale) {
-		String prefix = resourceName.substring(0, resourceName.lastIndexOf("."));
-		String after = resourceName.substring(resourceName.lastIndexOf(".") + 1, resourceName.length());
-		String newResourceName = prefix + "_" + locale.getDisplayName() + "." + after;
+	private static String getProperty(String resourceName, String key,
+			String defaultValue, Locale locale) {
+		String prefix = resourceName
+				.substring(0, resourceName.lastIndexOf("."));
+		String after = resourceName.substring(
+				resourceName.lastIndexOf(".") + 1, resourceName.length());
+		String newResourceName = prefix + "_" + locale.getDisplayName() + "."
+				+ after;
 		return getProperty(newResourceName, key, defaultValue);
 	}
 
-	private static String getProperty(String resourceName, String key, String defaultValue) {
+	private static String getProperty(String resourceName, String key,
+			String defaultValue) {
 		try {
 			String value = getPropertyInFile(resourceName, key);
 			if ((value != null) && (!("".equalsIgnoreCase(value))))
@@ -109,7 +128,8 @@ public class MyProp {
 		return defaultValue;
 	}
 
-	private static String getPropertyInFile(String resourceName, String key) throws Exception {
+	private static String getPropertyInFile(String resourceName, String key)
+			throws Exception {
 		Properties props = (Properties) propsCache.get(resourceName);
 		MyProp utilProperties = new MyProp();
 		if (props == null) {
@@ -131,7 +151,8 @@ public class MyProp {
 				props.load(reader);
 			} catch (Exception e) {
 				try {
-					in = utilProperties.getClass().getResourceAsStream("/" + resourceName);
+					in = utilProperties.getClass().getResourceAsStream(
+							"/" + resourceName);
 					reader = new InputStreamReader(in, "UTF-8");
 					props.load(reader);
 				} catch (Exception e1) {
@@ -150,12 +171,19 @@ public class MyProp {
 	public static String getVariable(String key) {
 		for (int i = 0; i < fileArray.length; ++i) {
 			String value = null;
+			value = RedisUtilSimple.get(userDir + key,2);
+			if (StringUtils.isNotBlank(value)) {
+				return value;
+			}
 			try {
 				value = getPropertyInFile(fileArray[i], key);
-				if ((value == null) || ("".equalsIgnoreCase(value)))
-					return StringUtils.trim(value);
+				if (StringUtils.isNotBlank(value)) {
+					RedisUtilSimple.set(userDir + key, value,2);
+				}
+				return StringUtils.trim(value);
 			} catch (Exception e) {
-				if ((e.getMessage() != null) && (!(e.getMessage().equals("null")))) {
+				if ((e.getMessage() != null)
+						&& (!(e.getMessage().equals("null")))) {
 					System.out.println(e.getMessage());
 				}
 			}
@@ -168,7 +196,7 @@ public class MyProp {
 			String value = null;
 			try {
 				value = getPropertyInFile(fileArray[i], key);
-				if ((value == null) || ("".equalsIgnoreCase(value)))
+				if (StringUtils.isBlank(value))
 					return StringUtils.trim(defaultValue);
 				return StringUtils.trim(value);
 			} catch (Exception e) {
@@ -180,7 +208,8 @@ public class MyProp {
 		return StringUtils.trim(defaultValue);
 	}
 
-	public static String getVariable(String file, String key, String defaultValue) {
+	public static String getVariable(String file, String key,
+			String defaultValue) {
 		String value = null;
 		try {
 			value = getPropertyInFile(file, key);
