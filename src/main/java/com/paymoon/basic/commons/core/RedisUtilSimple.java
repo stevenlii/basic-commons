@@ -10,7 +10,7 @@ public class RedisUtilSimple {
 	private static Logger logger = LogManager.getLogger();
 
 	public static String get(final String key) {
-		logger.info("query  from Redis, key is "+ key );
+		logger.debug("query  from Redis, key is "+ key );
 		if (StringUtils.isBlank(key))
 			return null;
 		Jedis jedis = null;
@@ -27,7 +27,7 @@ public class RedisUtilSimple {
 		return null;
 	}
 	public static String get(final String key,final int dbindex) {
-		logger.info("query  from Redis, key is "+ key );
+		logger.debug("query  from Redis, key is "+ key );
 		if (StringUtils.isBlank(key))
 			return null;
 		Jedis jedis = null;
@@ -44,7 +44,7 @@ public class RedisUtilSimple {
 		return null;
 	}
 	public static String set(final String key,final String value) {
-		logger.info(" Redis save, key is "+ key );
+		logger.debug(" Redis save, key is "+ key );
 		if (StringUtils.isBlank(key))
 			return null;
 		Jedis jedis = null;
@@ -62,7 +62,7 @@ public class RedisUtilSimple {
 		return oldV;
 	}
 	public static String set(final String key,final String value,final int dbindex) {
-		logger.info(" Redis save, key is "+ key );
+		logger.debug(" Redis save, key is "+ key );
 		if (StringUtils.isBlank(key))
 			return null;
 		Jedis jedis = null;
